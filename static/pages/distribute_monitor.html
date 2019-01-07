@@ -1,0 +1,868 @@
+<style>
+    .el-step__title.is-wait {
+        color: #636363 !important;
+    }
+
+    .el-step__icon.is-text {
+        border-radius: 50% !important;
+    }
+
+    input[type=file] {
+        display: none !important;
+    }
+    .el-message{
+        top: 60px !important;
+    }
+</style>
+<div class="row" id="app" v-loading="loading2" >
+    <div class="col-md-2">
+        <div class="portlet light portlet-fit bordered">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="icon-refresh font-green"></i>
+                    <span class="caption-subject bold font-green uppercase"> 流程管理</span>
+                </div>
+            </div>
+            <div class="portlet-body util-btn-margin-bottom-5">
+                <div class="clearfix" style="height: 650px;">
+                    <el-steps :active="stepVal1" direction="vertical" finish-status="success">
+                        <el-step title="导入训练数据"></el-step>
+                        <el-step title="选择特征字段"></el-step>
+                        <el-step title="选择预测字段"></el-step>
+                        <el-step title="选择算法"></el-step>
+                        <el-step title="建模训练监督"></el-step>
+                        <!--<el-step title="导入测试数据"></el-step>
+                        <el-step title="结果查看"></el-step>-->
+                        <el-step title="模型准确率"></el-step>
+                        <el-step title="模型保存"></el-step>
+                    </el-steps>
+
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-10">
+        <div class="portlet light portlet-fit bordered">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class="icon-refresh font-green"></i>
+                    <span class="caption-subject bold font-green uppercase"> 内容</span>
+                </div>
+            </div>
+            <div class="portlet-body util-btn-margin-bottom-5">
+                <div class="clearfix" style="min-height: 650px;">
+
+                    <div class="row">
+                        <div class="col-md-10">
+                            <div class="col-md-3">
+                                <el-radio-group v-model="radio" size="medium" @change="type_change">
+                                  <el-radio label="1" border>数据分类</el-radio>
+                                  <el-radio label="2" border>数据预测</el-radio>
+                                </el-radio-group>
+                            </div>
+                            <div class="col-md-9">
+                                <el-button type="text" disabled>{{ cue_message }}</el-button>
+
+                            </div>
+                        </div>
+                    </div>
+                    <hr/>
+                    <!-- 数据库连接测试 -->
+                    <div class="row">
+                        <div class="col-md-10">
+                            <div class="col-md-3">
+                                <el-input size="small" placeholder="请输入内容" v-model="db_info.db_ip">
+                                    <template slot="prepend">数据库地址</template>
+                                </el-input>
+                            </div>
+                            <div class="col-md-3">
+                                <el-input size="small" placeholder="请输入内容" v-model="db_info.db_port">
+                                    <template slot="prepend">端口号</template>
+                                </el-input>
+                            </div>
+                            <div class="col-md-3">
+                                <el-input size="small" placeholder="请输入内容" v-model="db_info.db_name">
+                                    <template slot="prepend">用户名</template>
+                                </el-input>
+                            </div>
+                            <div class="col-md-3">
+                                <el-input size="small" placeholder="请输入内容" v-model="db_info.db_pw">
+                                    <template slot="prepend">密码</template>
+                                </el-input>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <el-button size="small" plain :type="type" :loading="isLoading" :disabled="isLoading"
+                                       :icon="icon_status"
+                                       @click="test_link" style="border-radius: 20px !important;">连接测试
+                            </el-button>
+                            <el-button type="success" v-show="res_status[0]==1" icon="el-icon-check" size="mini"
+                                       style="border-radius: 50% !important;padding: 8px"></el-button>
+                            <el-button type="danger" v-show="res_status[0]==2" icon="el-icon-close" size="mini"
+                                       style="border-radius: 50% !important;padding: 8px"></el-button>
+                        </div>
+                    </div>
+                    <hr/>
+
+                    <!-- 特征字段选择 -->
+                    <div class="row">
+                        <div class="col-md-10">
+                            <div class="col-md-3" v-for="(v,i) in arr_feature" style="margin-bottom: 15px;">
+                                <el-cascader size="small" :options="options_db" @active-item-change="handleItemChange"
+                                             v-model="arr_feature[i]" :show-all-levels="true"
+                                             :props="props"></el-cascader>
+                            </div>
+                            <div class="col-md-2">
+                                <el-button type="primary" plain icon="el-icon-plus"
+                                           style="padding: 8px;margin-bottom: 15px;" @click="add_select(1)"></el-button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-10">
+                                    <el-tag type="info" >已选特征字段:</el-tag>
+                                    <el-tag type="success" closable  v-for="(v,i) in arr_feature"
+                                            v-if="Array.isArray(v)&&v[0]!=''"
+                                            @close="handleClose(i)" style="margin-right: 15px;margin-bottom: 15px;font-size: 15px;">
+                                        {{ Array.isArray(v)&&v[0]!=''?v.map(e=>e.label).join(' : '):'' }}
+                                    </el-tag>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="input-group" style="padding-left: 5px;">
+                                    <el-button size="small" type="primary" plain
+                                               style="border-radius: 20px !important;" @click="feature_select" :disabled="stepVal1 < 1">确认选择
+                                    </el-button>
+                                    <el-button type="success" v-show="res_status[1]==1" icon="el-icon-check" size="mini"
+                                       style="border-radius: 50% !important;padding: 8px"></el-button>
+                                    <el-button type="danger" v-show="res_status[1]==2" icon="el-icon-close" size="mini"
+                                       style="border-radius: 50% !important;padding: 8px"></el-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr/>
+
+                    <!-- 预测字段选择 -->
+                    <div class="row">
+                        <div class="col-md-10">
+
+                            <div class="col-md-3" v-for="(v,i) in arr_predict" style="margin-bottom: 15px;">
+                                <el-cascader size="small" :options="options_db" @active-item-change="handleItemChange"
+                                             v-model="arr_predict[i]"
+                                             :props="props"></el-cascader>
+                            </div>
+                            <div class="col-md-2">
+                                <el-button type="primary" plain icon="el-icon-plus"
+                                           style="padding: 8px;margin-bottom: 15px;" @click="add_select(2)"></el-button>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-10">
+
+                                <el-tag type="info" >已选预测字段:</el-tag>
+                                    <el-tag type="success" closable  v-for="(v,i) in arr_predict"
+                                            v-if="Array.isArray(v)&&v[0]!=''"
+                                            @close="handleClose_predict(i)" style="margin-right: 15px;margin-bottom: 15px;font-size: 15px;">
+                                        {{ Array.isArray(v)&&v[0]!=''?v.map(e=>e.label).join(' : '):'' }}
+                                    </el-tag>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="input-group" style="padding-left: 5px;">
+                                    <el-button size="small" type="primary" plain
+                                               style="border-radius: 20px !important;" @click="predict_select" :disabled="stepVal1 < 2">确认选择
+                                    </el-button>
+                                    <el-button type="success" v-show="res_status[2]==1" icon="el-icon-check" size="mini"
+                                       style="border-radius: 50% !important;padding: 8px"></el-button>
+                                    <el-button type="danger" v-show="res_status[2]==2" icon="el-icon-close" size="mini"
+                                       style="border-radius: 50% !important;padding: 8px"></el-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr/>
+                    <!-- 预测算法选择 -->
+                    <div class="row">
+                        <div class="col-md-12">
+
+                            <div class="col-md-3" style="margin-bottom: 15px;">
+                                <el-select
+                                    size="small"
+                                    v-model="value_methods"
+                                    collapse-tags
+                                    placeholder="请选择">
+                                    <el-option
+                                      v-for="item in options_methods"
+                                      :key="item.value"
+                                      :label="item.label"
+                                      :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-10">
+
+                                <el-tag type="info" >已选预测算法:</el-tag>
+                                    <el-tag type="success" v-show="field_select_methods!=''"
+                                            style="margin-right: 15px;margin-bottom: 15px;font-size: 15px;">
+                                        {{ field_select_methods }}
+                                    </el-tag>
+                                <!--<el-input size="small" placeholder="" v-model="field_select_methods" readOnly>
+                                    <template slot="prepend">已选预测算法：</template>
+                                </el-input>-->
+                            </div>
+                            <div class="col-md-2">
+                                <div class="input-group" style="padding-left: 5px;">
+                                    <el-button size="small" type="primary" plain
+                                               style="border-radius: 20px !important;" :disabled="stepVal1 < 3" @click="methods_select">确认选择
+                                    </el-button>
+                                    <el-button type="success" v-show="res_status[3]==1" icon="el-icon-check" size="mini"
+                                       style="border-radius: 50% !important;padding: 8px"></el-button>
+                                    <el-button type="danger" v-show="res_status[3]==2" icon="el-icon-close" size="mini"
+                                       style="border-radius: 50% !important;padding: 8px"></el-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr/>
+                    <!-- 建模训练监督 -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-1">
+                                <el-button size="small" type="primary" plain
+                                               style="border-radius: 20px !important;" :disabled="stepVal1 < 4" @click="start_build_model">开始建模
+                                </el-button>
+                            </div>
+                            <div class="col-md-9" style="line-height: 50px;">
+                                <el-progress :text-inside="true" :stroke-width="18" :show-text="false" :percentage="percentage_value" status="success" style="margin-top: 5px;"></el-progress>
+                            </div>
+                            <div class="col-md-2">
+                                <el-button type="success" v-show="res_status[4]==1" icon="el-icon-check" size="small"
+                                       style="border-radius: 20px !important;">建模完成！</el-button>
+                                <el-button type="danger" v-show="res_status[4]==2" icon="el-icon-close" size="small"
+                                       style="border-radius: 20px !important;padding: 8px">建模失败！</el-button>
+                            </div>
+                        </div>
+                    </div>
+                    <hr style="display: none;"/>
+
+                    <!-- 数据预测 -->
+                    <div class="row" style="display: none;">
+                        <div class="col-md-12">
+                            <div class="col-md-10">
+                                <el-tabs type="border-card">
+
+                                  <el-tab-pane label="单条数据预测">
+                                      <div class="col-md-3" v-for="(v,i) in column_feature">
+                                         <el-input size="small" placeholder="请输入内容" style="margin-bottom: 15px;">
+                                            <template slot="prepend">{{ v }}</template>
+                                         </el-input>
+                                     </div>
+
+                                      <div class="col-md-3">
+                                             <el-button size="small" type="primary" plain
+                                                       style="border-radius: 20px !important;" :disabled="stepVal1 < 5" @click="single_predict">单条预测
+                                             </el-button>
+                                              <el-button type="success" v-show="res_status[5]==1" icon="el-icon-check" size="small"
+                                                   style="border-radius: 50% !important;padding: 5px"></el-button>
+                                              <el-button type="danger" v-show="res_status[5]==2" icon="el-icon-close" size="small"
+                                                   style="border-radius: 50% !important;padding: 5px"></el-button>
+                                      </div>
+
+                                  </el-tab-pane>
+
+                                  <el-tab-pane label="批量数据预测">
+                                      <div class="row">
+
+                                          <div class="col-md-3">
+                                                <el-input size="small" placeholder="请输入内容" v-model="db_predict.db_ip">
+                                                    <template slot="prepend">数据库地址</template>
+                                                </el-input>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <el-input size="small" placeholder="请输入内容" v-model="db_predict.db_port">
+                                                    <template slot="prepend">端口号</template>
+                                                </el-input>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <el-input size="small" placeholder="请输入内容" v-model="db_predict.db_name">
+                                                    <template slot="prepend">用户名</template>
+                                                </el-input>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <el-input size="small" placeholder="请输入内容" v-model="db_predict.db_pw">
+                                                    <template slot="prepend">密码</template>
+                                                </el-input>
+                                            </div>
+                                        </div>
+                                      <div class="row" style="margin-top: 15px;">
+                                        <div class="col-md-3">
+                                          <el-input size="small" placeholder="请输入内容" v-model="db_info.db_pw">
+                                                    <template slot="prepend">密码</template>
+                                                </el-input>
+                                        </div>
+                                        <div class="col-md-3">
+                                             <el-button size="small" type="primary" plain
+                                                       style="border-radius: 20px !important;" :disabled="stepVal1 < 5" @click="multi_predict">批量预测
+                                             </el-button>
+                                             <el-button type="success" v-show="res_status[6]==1" icon="el-icon-check" size="small"
+                                                   style="border-radius: 50% !important;padding: 5px"></el-button>
+                                             <el-button type="danger" v-show="res_status[6]==2" icon="el-icon-close" size="small"
+                                                   style="border-radius: 50% !important;padding: 5px"></el-button>
+                                        </div>
+                                      </div>
+
+                                  </el-tab-pane>
+                                </el-tabs>
+                            </div>
+                        </div>
+                    </div>
+                    <hr style="display: none;" />
+                    <!-- 预测结果 -->
+                    <div class="row" style="display: none;">
+                        <div class="col-md-12">
+                            <div class="col-md-12">
+                                <div class="demo-input-suffix">
+                                    预测结果：<el-button type="text" @click="dialogTableVisible = true">点击此处查看</el-button>
+                                </div>
+
+                                <el-dialog title="收货地址" :visible.sync="dialogTableVisible">
+                                  <el-table :data="gridData">
+                                    <el-table-column property="date" label="日期"></el-table-column>
+                                    <el-table-column property="name" label="姓名"></el-table-column>
+                                    <el-table-column property="address" label="地址"></el-table-column>
+                                    <el-table-column property="sex" label="性别">
+                                        <template slot-scope="scope">
+                                            <el-tag :type="scope.row.sex === '男' ? 'primary' : 'success'" disable-transitions>{{scope.row.sex}}</el-tag>
+                                        </template>
+                                    </el-table-column>
+                                  </el-table>
+                                   <div class="block">
+                                    <el-pagination
+                                      @size-change="handleSizeChange"
+                                      @current-change="handleCurrentChange"
+                                      :current-page="currentPage4"
+                                      :page-sizes="[100, 200, 300, 400]"
+                                      :page-size="100"
+                                      layout="total, sizes, prev, pager, next, jumper"
+                                      :total="400">
+                                    </el-pagination>
+                                  </div>
+                                </el-dialog>
+                            </div>
+                        </div>
+                    </div>
+                    <hr/>
+
+                    <!-- 模型准确率 -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-12">
+                             模型准确率：<el-button type="text">{{ accuracy_rate }}</el-button>
+                            </div>
+                        </div>
+                        <div class="col-md-12"  style="display: none;">
+                            <div class="col-md-12">
+
+                                <div id="myChart" style="width:100%;height: 500px"></div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                     <hr/>
+                    <!-- 模型保存 -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-12">
+                                <div class="demo-input-suffix">
+                                    是否保存模型：
+                                    <el-button size="small" type="primary" plain :icon="icon_save"
+                                                       style="border-radius: 20px !important;width:100px;" :disabled="stepVal1 < 6" @click="save_model" >保存
+                                    </el-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="../static/assets/js/element.min.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+    var app = new Vue({
+        el: '#app',
+        data: {
+            radio: '1',
+            cue_message : '',
+            loading2:false,
+            stepVal1: 0,
+            isLoading: false,
+            type: 'primary',
+            icon_status: '',
+            res_status: new Array(9).fill(0),
+            db_index: '1',
+            db_info: {
+                db_ip: '192.168.252.200',
+                db_port: '3306',
+                db_name: 'root',
+                db_pw: 'root'
+            },
+            db_select: {
+                db_1: 'medical_robot'
+            },
+            options_db: [],
+            props: {
+                value: 'value',
+                lable : 'label',
+                children: 'children'
+            },
+            arr_feature: new Array(1).fill(''),
+            arr_predict: new Array(1).fill(''),
+            fileList: [],
+            options_methods:[],
+            value_methods: [],
+            percentage_value : 0,
+            column_feature: ('name,age,sex,weight,width').split(','),
+            column_predict: ('height').split(','),
+            db_predict: {
+                db_ip: '192.168.20.30',
+                db_port: '3306',
+                db_name: 'root',
+                db_pw: 'ssc123'
+            },
+
+            gridData: [{
+              date: '2016-05-02',
+              name: '王小虎',
+              address: '上海市普陀区金沙江路 1518 弄',
+              sex: '女'
+            }, {
+              date: '2016-05-04',
+              name: '王小虎',
+              address: '上海市普陀区金沙江路 1518 弄',
+              sex: '男'
+            }, {
+              date: '2016-05-01',
+              name: '王小虎',
+              address: '上海市普陀区金沙江路 1518 弄',
+              sex: '女'
+            }, {
+              date: '2016-05-03',
+              name: '王小虎',
+              address: '上海市普陀区金沙江路 1518 弄',
+              sex: '男'
+            }],
+            dialogTableVisible: false,
+            currentPage4: 4,
+            accuracy_rate: '',
+            icon_save: '',
+            flag_model: 1,
+            model_name: ''
+        },
+        computed:{
+            filed_selected_feature:function(){
+
+                if(this.arr_feature.length >= 1 && this.arr_feature[0] != ''){
+                    return this.arr_feature.filter(e=>Array.isArray(e)&&e[0]!='').map(e=>e.map(el=>el.label).join(' : '));//.join(',   ')
+                }
+
+                //return this.arr_feature.filter(e=>e.length==2&&e[1]!='').map(e=>e[0].label).join(', ');
+            },
+            filed_selected_predict:function(){
+                if(this.arr_predict.length >= 1 && this.arr_predict[0] != ''){
+                    return this.arr_predict.filter(e=>Array.isArray(e)&&e[0]!='').map(e=>e.map(el=>el.label).join(' : '));//.join(',   ')
+                }
+                //return this.arr_predict.filter(e=>e.length==2&&e[1]!='').map(e=>e[1]).join(', ');
+            },
+            field_select_methods:function(){
+                console.log(this.value_methods)
+                return this.value_methods;
+            }
+        },
+        methods: {
+            type_change: function(){
+                if(this.radio == 1){
+                    this.cue_message = "提示：当前流程为数据分类建模，请保证所选数据列中无异常数据！";
+                }else{
+                    this.cue_message = "提示：当前流程为数据预测建模，请保证所选数据列中无异常数据且均为数值类型！";
+                }
+            },
+            next: function (step) {
+                //this.stepVal1++
+                this.stepVal1 = step;
+            },
+            preview: function () {
+                if (this.stepVal1-- <= 0) {
+                    this.stepVal1 = 0
+                } else {
+                    this.stepVal1--
+                }
+            },
+            test_link: function () {
+                this.isLoading = true;
+                that = this
+                $.ajax({
+                    url: "mysql_info/",
+                    type: 'POST',
+                    data: {data: this.db_info, level:''},
+                    success: function (result) {
+                        console.log(result);
+                        that.options_db = result;//.map((e,i)=>Object.assign(e,{info:{value:i,label:e.label}}));
+                        that.isLoading = false;
+                        that.res_status[0] = 1;
+                        that.next(1);
+                    },
+                    error: function () {
+                        that.isLoading = false;
+                        that.link_status[0] = 2;
+                    }
+                });
+            },
+            add_select: function (index) {
+                if(index == 1){
+                    this.arr_feature.push('');
+                }else if(index == 2){
+                    this.arr_predict.push('');
+                }else{
+
+                }
+
+            },
+            submitUpload: function () {
+                this.$refs.upload.submit();
+            },
+            handleRemove: function (file, fileList) {
+                console.log(file, fileList);
+            },
+            handlePreview: function (file) {
+                console.log(file);
+            },
+
+            handleItemChange: function (val) {
+                //console.log('active item:', val.length);
+                that = this;
+                database = '';
+                db_str = '';
+                level_no = '';
+                if(val.length == 1){
+                    database = this.options_db[val[0].value].label;
+                    db_str = this.options_db[val[0].value].label;
+                    level_no = this.options_db[val[0].value].level;
+                    if(this.options_db[val[0].value].children.length != 0){
+                        return true;
+                    }
+                }else if(val.length == 2){
+                    database = this.options_db[val[0].value].label;
+                    db_str = this.options_db[val[0].value].children[val[1].value].label;
+                    level_no = this.options_db[val[0].value].children[val[1].value].level;
+                    if(this.options_db[val[0].value].children[val[1].value].children.length != 0){
+                        return true;
+                    }
+                }
+                $.post("mysql_info/",{data:that.db_info, database:database,curr_label: db_str, level: level_no},function(result){
+                    if(val.length == 1){
+                        //that.options_db[val[0]].children = result;
+                        Vue.set(that.options_db,val[0].value,Object.assign(that.options_db[val[0].value],{children:result}))
+                    }else if(val.length == 2){
+                        //that.options_db[val[0]].children[val[1]].children = result;
+                        Vue.set(that.options_db[val[0].value].children,val[1].value,Object.assign(that.options_db[val[0].value].children[val[1].value],{children:result}))
+                    }
+                });
+            },
+
+            //message提示框方法
+            show_message:function(index, content){
+                if(index == 1){
+                    this.$message(content);
+                }else if(index == 2){
+                    this.$message({
+                        message:content,
+                        type: 'error',
+                        showClose: true,
+                    })
+                }else if(index == 3){
+                    this.$message({
+                      message: content,
+                      type: 'warning',
+                      showClose: true
+                    });
+                }else{
+                    this.$message({
+                      message: content,
+                      type: 'success',
+                        showClose: true
+                    });
+                }
+            },
+            feature_select:function(){
+                console.log(this.arr_feature[0])
+                if(this.arr_feature[0] != ''){
+                    Vue.set(this.res_status,1,1);
+                    this.next(2);
+                }else{
+                   this.show_message(2,'请至少选择一个及以上的特征字段！');
+                   Vue.set(this.res_status,1,2);
+                }
+            },
+            predict_select: function(){
+                if(this.arr_predict[0] != ''){
+                    Vue.set(this.res_status,2,1);
+                    this.next(3);
+                }else{
+                   this.show_message(2,'请至少选择一个及以上的预测字段！');
+                   Vue.set(this.res_status,2,2);
+                }
+
+            },
+            methods_select: function(){
+                if(this.value_methods.length > 0){
+                    Vue.set(this.res_status,3,1);
+                    this.next(4);
+                }else{
+                    this.show_message(2,'请至少选择一个及以上的预测算法！');
+                    Vue.set(this.res_status,3,2);
+                }
+
+            },
+            start_build_model: function(){
+
+                that = this;
+                Vue.set(that.res_status,4,'');
+                console.log('********************************************************************************************')
+                var feature = this.arr_feature.map(e=>e.map(el=>el.label).join(':')).join(',');
+                var predict = this.arr_predict.map(e=>e.map(el=>el.label).join(':')).join(',');
+                var methods = this.value_methods;
+                var db_info = this.db_info;
+                that = this;
+                var int;
+                $.ajax({
+                    type: "post",
+                    data: {data_type: this.radio,data_feature: feature, data_predict:predict, data_methods: methods,db_info:db_info},
+                    url: "data_manage/",
+                    beforeSend: function () {
+                        int = setInterval(function(){
+                            var flag = that.flag_model
+                            if(flag == 1){
+                                that.percentage_value += 1;
+                                if(that.percentage_value > 100){
+                                    that.percentage_value = 0;
+                                }
+                            }else{
+                                clearInterval(int)
+                            }
+                        },100);
+                    },
+                    success: function (res) {
+                        console.log(res)
+                        if(res == 'data_err'){
+                            that.show_message(2,'所选数据列中存在异常数据，请核查！');
+                            that.flag_model = 2;
+                            that.percentage_value = 0;
+                            Vue.set(that.res_status,4,2)
+                        }else if(res == 'conn_err'){
+                            that.show_message(2,'连接查询数据出现异常！');
+                            that.flag_model = 2;
+                            that.percentage_value = 0;
+                            Vue.set(that.res_status,4,2)
+                        }else if(res.indexOf("字段") != -1){
+                            that.show_message(2,res);
+                            that.flag_model = 2;
+                            that.percentage_value = 0;
+                            Vue.set(that.res_status,4,2)
+                        }else{
+                            that.flag_model = 2;
+                            that.percentage_value = 100;
+                            Vue.set(that.res_status,4,1);
+                            that.accuracy_rate = res[1].toFixed(2) + '%';
+                            that.model_name = res[0];
+                            that.flag_model = 1;
+                            that.next(6);
+                        }
+                        clearInterval(int)
+                    },
+                    complete: function () {
+                        clearInterval(int)
+                    },
+                    error: function (data) {
+                        that.flag_model = 2;
+                        that.percentage_value = 0;
+                        clearInterval(int)
+                    }
+                });
+
+            },
+            buld_model:function(){
+
+
+            },
+            single_predict: function(){
+                Vue.set(this.res_status,5,1);
+            },
+            multi_predict: function(){
+                Vue.set(this.res_status,6,1);
+            },
+            handleSizeChange: function(val) {
+                //console.log(`每页 ${val} 条`);
+            },
+            handleCurrentChange: function(val) {
+                //console.log(`每页 ${val} 条`);
+            },
+            drawLine: function(){
+
+                // 基于准备好的dom，初始化echarts实例
+                var myChart = echarts.init(document.getElementById('myChart'));
+                // 绘制图表
+                option = {
+                    title: {
+                        text: null
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data:['邮件营销','联盟广告','视频广告','直接访问','搜索引擎']
+                    },
+                    grid: {
+                        left: '0',
+                        right: '15%',
+                        bottom: '3%',
+                        containLabel: true
+                    },
+                    toolbox: {
+                        feature: {
+                            //saveAsImage: {}
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: ['周一','周二','周三','周四','周五','周六','周日']
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [
+                        {
+                            name:'邮件营销',
+                            type:'line',
+                            stack: '总量',
+                            data:[120, 132, 101, 134, 90, 230, 210]
+                        },
+                        {
+                            name:'联盟广告',
+                            type:'line',
+                            stack: '总量',
+                            data:[220, 182, 191, 234, 290, 330, 310]
+                        },
+                        {
+                            name:'视频广告',
+                            type:'line',
+                            stack: '总量',
+                            data:[150, 232, 201, 154, 190, 330, 410]
+                        }
+                    ]
+                };
+                myChart.setOption(option)
+            },
+            save_model: function(){
+
+                that = this;
+                this.$prompt('此操作将永久删除该文件, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    inputPattern: /^[\S]{6,100}$/ ,
+                    inputErrorMessage: '请至少输入六位数字或字母！'
+                }).then((value) => {
+
+                    that.icon_save = 'el-icon-loading';
+                    thaat = that;
+                    ther = this;
+
+                    var feature = that.arr_feature.map(e=>e.map(el=>el.label).join(':')).join(',');
+                    console.log(feature)
+                    var predict = that.arr_predict.map(e=>e.map(el=>el.label).join(':')).join(',');
+                    var model_name = that.model_name;
+
+                    $.post('model_save/',{data_type: this.radio,data_feature: feature, data_predict:predict,model_name:model_name,new_name: value.value},function(res){
+                        if(res == 'success'){
+                            thaat.icon_save = 'el-icon-check';
+                            ther.$message({
+                                type: 'success',
+                                message: '模型保存成功！'
+                            });
+                            this.next(7);
+                        }else{
+                            thaat.icon_save = 'el-icon-close';
+                            ther.$message({
+                                type: 'warning',
+                                message: '模型保存失败！'
+                            });
+                        }
+
+
+                    });
+
+                }).catch(() => {
+                      this.$message({
+                        type: 'warning',
+                        message: '已取消保存！'
+                      });
+                });
+
+
+
+
+
+
+            },
+            handleClose:function(i){
+                console.log(i)
+                Vue.set(this.arr_feature, i, ['','',''])
+            },
+            handleClose_predict: function(i){
+                console.log(i)
+                Vue.set(this.arr_predict, i, ['','',''])
+            }
+
+
+
+        },
+        mounted:function(){
+            //this.drawLine();
+            this.type_change()
+            //加载算法下拉列表
+            that = this;
+            $.post("dict_calc/",{},function(result){
+                console.log(result);
+                that.options_methods = result;
+                //Vue.set(that.options_methods, result);
+            });
+        }
+    })
+
+
+</script>

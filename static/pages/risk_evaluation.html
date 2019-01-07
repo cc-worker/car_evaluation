@@ -1,0 +1,413 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet light bordered">
+            <div class="portlet-title">
+                <div class="caption font-dark">
+                    <i class="icon-settings font-dark"></i>
+                    <span class="caption-subject bold uppercase"> 功能 </span>
+                </div>
+            </div>
+            <div class="portlet-body">
+
+                <form class="form-horizontal" role="form">
+                    <div class="form-body">
+                        <div class="form-group">
+                            <div class="col-md-3">
+                                <div class="input-group select2-bootstrap-prepend">
+                                                            <span class="input-group-btn">
+                                                                <button class="btn btn-default" type="button"
+                                                                        data-select2-open="single-prepend-text">
+                                                                    <span>算法选择</span>
+                                                                </button>
+                                                            </span>
+                                    <select id="car_brand" class="form-control select2">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group select2-bootstrap-prepend">
+                                                            <span class="input-group-btn">
+                                                                <button class="btn btn-default" type="button"
+                                                                        data-select2-open="single-prepend-text">
+                                                                    <span>（零部件）部件选择</span>
+                                                                </button>
+                                                            </span>
+                                    <select id="car_class" class="form-control select2">
+
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group select2-bootstrap-prepend">
+                                                            <span class="input-group-btn">
+                                                                <button class="btn btn-default" type="button"
+                                                                        data-select2-open="single-prepend-text">
+                                                                    <span>（零部件）部件选择</span>
+                                                                </button>
+                                                            </span>
+                                    <select id="lj_type" class="form-control select2">
+
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="btn-group">
+                                    <button type="button" onclick="getData()"
+                                            class="btn btn-circle green"> 提交
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+        <a class="dashboard-stat dashboard-stat-v2 blue" href="#">
+            <div class="visual">
+                <i class="fa fa-comments"></i>
+            </div>
+            <div class="details">
+                <div class="number">
+                    <span id="lj_tousu" data-counter="counterup" data-value="0.00000">0</span>
+                </div>
+                <div class="desc"> 系列零部件投诉率</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+        <a class="dashboard-stat dashboard-stat-v2 red" href="#">
+            <div class="visual">
+                <i class="fa fa-bar-chart-o"></i>
+            </div>
+            <div class="details">
+                <div class="number">
+                    <span id="lj_harm" data-counter="counterup" data-value="0.00000">0</span>
+                </div>
+                <div class="desc"> 零部件风险指数</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+        <a class="dashboard-stat dashboard-stat-v2 green" href="#">
+            <div class="visual">
+                <i class="fa fa-shopping-cart"></i>
+            </div>
+            <div class="details">
+                <div class="number">
+                    <span id="lj_risk" data-counter="counterup" data-value="0.00000">0</span>
+                </div>
+                <div class="desc"> 系列风险指数</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+        <a class="dashboard-stat dashboard-stat-v2 purple" href="#">
+            <div class="visual">
+                <i class="fa fa-globe"></i>
+            </div>
+            <div class="details">
+                <div class="number">
+                    <span id="cp_risk" data-counter="counterup" data-value="0.00000"></span>
+                </div>
+                <div class="desc"> 品牌风险指数</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="portlet light portlet-fit bordered">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class=" icon-layers font-green"></i>
+                    <span class="caption-subject font-green bold uppercase">Pie Chart</span>
+                </div>
+                <div class="actions">
+                    <a class="btn btn-circle btn-icon-only btn-default" href="javascript:;">
+                        <i class="icon-cloud-upload"></i>
+                    </a>
+                    <a class="btn btn-circle btn-icon-only btn-default" href="javascript:;">
+                        <i class="icon-wrench"></i>
+                    </a>
+                    <a class="btn btn-circle btn-icon-only btn-default" href="javascript:;">
+                        <i class="icon-trash"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div id="echarts_line" style="height:500px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="portlet light portlet-fit bordered">
+            <div class="portlet-title">
+                <div class="caption">
+                    <i class=" icon-layers font-green"></i>
+                    <span class="caption-subject font-green bold uppercase">Pie Chart</span>
+                </div>
+                <div class="actions">
+                    <a class="btn btn-circle btn-icon-only btn-default" href="javascript:;">
+                        <i class="icon-cloud-upload"></i>
+                    </a>
+                    <a class="btn btn-circle btn-icon-only btn-default" href="javascript:;">
+                        <i class="icon-wrench"></i>
+                    </a>
+                    <a class="btn btn-circle btn-icon-only btn-default" href="javascript:;">
+                        <i class="icon-trash"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div id="echarts_pie" style="height:500px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="application/javascript">
+    $(function () {
+        $.ajax({
+            url: "http://192.168.20.128:8000/risk_page/",
+            type: 'GET',
+            //data: {car_brand: car_brand, car_class: car_class, lj_key: li_value},
+            success: function (res) {
+                var sel_brand = "";
+                for (var i in res.select_brand) {
+                    var tmp = res.select_brand
+                    sel_brand = sel_brand + "<option value=" + tmp[i].brand + ">" + tmp[i].brand + "</option>";
+
+                }
+                $("#car_brand").html(sel_brand)
+
+                var sel_carCls = "";
+                for (var k in res.select_class) {
+                    var tmp = res.select_class
+                    sel_carCls = sel_carCls + "<option value=" + tmp[k] + ">" + tmp[k] + "</option>";
+
+                }
+                $("#car_class").html(sel_carCls)
+
+                var sel_lj = "";
+                for (var j in res.select_lj) {
+                    var tmp = res.select_lj
+                    sel_lj = sel_lj + "<option value=" + tmp[j] + ">" + tmp[j] + "</option>";
+                }
+                $("#lj_type").html(sel_lj)
+
+            }
+        });
+
+        var myChart = echarts.init(document.getElementById('echarts_pie'));
+        option2 = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    crossStyle: {
+                        color: '#999'
+                    }
+                }
+            },
+            toolbox: {
+                feature: {
+                    dataView: {show: true, readOnly: false},
+                    magicType: {show: true, type: ['line', 'bar']},
+                    restore: {show: true},
+                    saveAsImage: {show: true}
+                }
+            },
+            legend: {
+                data: ['投诉指数', '风险指数', '故障概率']
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月'],
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+                    name: '投诉指数',
+                    min: 0,
+                    max: 0.009,
+                    interval: 50,
+                    axisLabel: {
+                        formatter: '{value}'
+                    }
+                },
+                {
+                    type: 'value',
+                    name: '风险指数',
+                    min: 0,
+                    max: 0.009,
+                    interval: 5,
+                    axisLabel: {
+                        formatter: '{value}'
+                    }
+                }
+            ],
+            series: [
+                {
+                    name: '投诉指数',
+                    type: 'bar',
+                    itemStyle: {
+                        //通常情况下：
+                        normal: {
+                            //每个柱子的颜色即为colorList数组里的每一项，如果柱子数目多于colorList的长度，则柱子颜色循环使用该数组
+                            color: function (params) {
+                                var colors = ['#fda67e', '#81cacc', '#cca8ba', '#735ba1', '#bda29a', '#6e7074', '#546570', '#c4ccd3'];
+                                return colors[parseInt(Math.random() * 10)];
+                            }
+                        },
+                        //鼠标悬停时：
+                        emphasis: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    },
+                    data: [0.0043, 0.0023, 0.0054, 0.0035, 0.0022, 0.0012, 0.0041, 0.0026]
+                },
+                {
+                    name: '风险指数',
+                    type: 'bar',
+                    data: [0.0040, 0.0020, 0.0050, 0.0030, 0.0018, 0.0015, 0.0052, 0.0015]
+                },
+                {
+                    name: '故障概率',
+                    type: 'line',
+                    yAxisIndex: 1,
+                    data: [0.0020, 0.0052, 0.00253, 0.0045,0.0063, 0.00750, 0.0075, 0.0070]
+                }
+            ]
+        };
+
+        myChart.setOption(option2)
+
+
+
+        var myChart2 = echarts.init(document.getElementById('echarts_line'));
+        data = [["2016-11",116],["2016-12",116],["2017-01",98],["2017-01",116],["2017-02",129],["2017-03",135],["2017-04",86],["2017-05",73],["2017-06",85],["2017-07",73],["2017-08",68],["2017-09",92]];
+
+        data2 = [["2016-11",110],["2016-12",136],["2017-01",112],["2017-01",125],["2017-02",125],["2017-03",122],["2017-04",90],["2017-05",70],["2017-06",80],["2017-07",70],["2017-08",80],["2017-09",85]];
+
+
+
+        var dateList = data.map(function (item) {
+            return item[0];
+        });
+        var valueList = data.map(function (item) {
+            return item[1];
+        });
+
+option = {
+
+    // Make gradient line here
+    visualMap: [{
+        show: false,
+        type: 'continuous',
+        seriesIndex: 0,
+        min: 0,
+        max: 400
+    }, {
+        show: false,
+        type: 'continuous',
+        seriesIndex: 1,
+        dimension: 0,
+        min: 0,
+        max: dateList.length - 1
+    }],
+
+
+    title: [{
+        left: 'center',
+        text: '系列风险指数分布'
+    }, {
+        top: '55%',
+        left: 'center',
+        text: '系列投诉率分布'
+    }],
+    tooltip: {
+        trigger: 'axis'
+    },
+    xAxis: [{
+        data: dateList
+    }, {
+        data: dateList,
+        gridIndex: 1
+    }],
+    yAxis: [{
+        splitLine: {show: false}
+    }, {
+        splitLine: {show: false},
+        gridIndex: 1
+    }],
+    grid: [{
+        bottom: '60%'
+    }, {
+        top: '60%'
+    }],
+    series: [{
+        type: 'line',
+        showSymbol: false,
+        data: valueList
+    }, {
+        type: 'line',
+        showSymbol: false,
+        data: data2,
+        xAxisIndex: 1,
+        yAxisIndex: 1
+    }]
+};
+        myChart2.setOption(option);
+
+    })
+
+    function getData() {
+        var li_value = $("#lj_type").val();
+        var car_class = $("#car_class").val();
+        var car_brand = $("#car_brand").val();
+        if (li_value == null || li_value == "") {
+            alert("请选择零部件")
+            return false;
+        }
+        $.ajax({
+            url: "http://192.168.20.128:8000/dataindex/",
+            type: 'POST',
+            data: {car_brand: car_brand, car_class: car_class, lj_key: li_value},
+            success: function (res) {
+                $("#lj_tousu").attr("data-value", res.tousu.toFixed(5));
+                $("#lj_harm").attr("data-value", res.harm.toFixed(5));
+                $("#lj_risk").attr("data-value", res.risk.toFixed(5));
+                $("#cp_risk").attr("data-value", res.cp_risk.toFixed(5));
+                $("[data-counter='counterup']").counterUp({
+                    delay: 10,
+                    time: 1000
+                });
+            }
+        });
+
+
+    }
+</script>
+<script src="../static/assets/global/plugins/select2/js/select2.full.min.js" type="text/javascript"></script>
+<script src="../static/assets/pages/scripts/components-select2.min.js" type="text/javascript"></script>
+<script src="../static/assets/global/scripts/app.min.js" type="text/javascript"></script>

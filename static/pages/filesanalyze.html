@@ -1,0 +1,159 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet light bordered">
+            <div class="portlet-title">
+                <div class="caption font-dark">
+                    <i class="icon-settings font-dark"></i>
+                    <span class="caption-subject bold uppercase"> 功能 </span>
+                </div>
+            </div>
+            <div class="portlet-body">
+
+                <form class="form-horizontal" role="form">
+                    <div class="form-body">
+                        <div class="form-group">
+                            <div class="col-md-8">
+                            <span  class="col-md-4">文本:</span>
+                                <input class="col-md-4" id="files_ana">
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="btn-group">
+                                    <button type="button" onclick="getResult()"
+                                            class="btn btn-circle green"> 提交
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-8">
+                            <span  class="col-md-4">result:</span>
+                                <input class="col-md-4" id="day_result">
+                            </div>
+                           
+                        </div>
+                    </div>
+
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet light bordered">
+            <div class="portlet-title">
+                <div class="caption font-dark">
+                    <i class="icon-settings font-dark"></i>
+                    <span class="caption-subject bold uppercase"> 功能 </span>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form class="form-horizontal" role="form">
+                    <div class="form-body">
+                        <div class="form-group">
+                            <div class="col-md-8">
+                            	<span  class="col-md-4">库名:</span>
+                                <input class="col-md-4" id="ku_name" value="car">
+                            </div>
+                            <div class="col-md-8">
+                            	<span  class="col-md-4">ip:</span>
+                                <input class="col-md-4" id="ip_name" value="192.168.20.11">
+                            </div>
+                            <div class="col-md-8">
+                            	<span  class="col-md-4">用户名:</span>
+                                <input class="col-md-4" id="user_name" value="root">
+                            </div>
+                            <div class="col-md-8">
+                            	<span  class="col-md-4">密码:</span>
+                                <input class="col-md-4" id="pwd_name" value="ssc221">
+                            </div>
+                            <div class="col-md-8">
+                            	<span  class="col-md-4">表名:</span><!--表名设定为了指定表，其中的detail列，以及insert相应的预测分类  -->
+                                <input class="col-md-4" id="table_name" value="files_info" >
+                            </div>
+                            <div class="col-md-4">
+                                <div class="btn-group">
+                                    <button type="button" onclick="getData(1)"
+                                            class="btn btn-circle green"> 连接
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button type="button" onclick="getData(2)"
+                                            class="btn btn-circle green"> 分类
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-8">
+                            <span  class="col-md-4">result:</span>
+                                <input class="col-md-4" id="conn_result">
+                            </div>
+                           
+                        </div>
+                    </div>
+
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="application/javascript">
+
+    $(function () {
+    	
+        
+    })
+
+    function getData(a) {
+    	var ku_name = $("#ku_name").val();
+    	var ip_name = $("#ip_name").val();
+    	var user_name = $("#user_name").val();
+    	var pwd_name = $("#pwd_name").val();
+    	var table_name = $("#table_name").val();
+        if (ku_name == null||ip_name==null||user_name==null||pwd_name==null||table_name==null) {
+            alert("请将信息填写完整")
+            return false;
+        }
+    	$.ajax({
+            url: "http://127.0.0.1:8000/files_conn_page/",
+            type: 'POST',
+            data: { type:a, ku_name: $("#ku_name").val(),ip_name: $("#ip_name").val()
+            	,user_name: $("#user_name").val(),pwd_name: $("#pwd_name").val(),table_name: $("#table_name").val()},
+            success: function (res) {
+				alert(res.result);
+            	$("#conn_result").val(res.result);
+            }
+        });
+    }
+    function getResult() {
+    	var files_ana = $("#files_ana").val();
+        if (files_ana == null) {
+            alert("请输入文本")
+            return false;
+        }
+    	$.ajax({
+            url: "http://127.0.0.1:8000/files_ana_page/",
+            type: 'POST',
+            data: { files_ana:files_ana},
+            success: function (res) {
+                console.log(res)
+            	$("#day_result").val(res);
+            }
+        });
+    }
+    
+</script>
+<script src="../static/assets/global/plugins/select2/js/select2.full.min.js" type="text/javascript"></script>
+<script src="../static/assets/pages/scripts/components-select2.min.js" type="text/javascript"></script>
+<script src="../static/assets/global/scripts/app.min.js" type="text/javascript"></script>

@@ -1,0 +1,66 @@
+<div class="row">
+    <div class="col-md-12">
+        <!-- BEGIN EXAMPLE TABLE PORTLET-->
+        <div class="portlet light bordered">
+            <div class="portlet-title">
+                <div class="caption font-dark">
+                    <i class="icon-settings font-dark"></i>
+                    <span class="caption-subject bold uppercase"> 列表 </span>
+                </div>
+                <div class="actions">
+                    <div class="btn-group btn-group-devided" data-toggle="buttons">
+                        <label class="btn btn-transparent dark btn-outline btn-circle btn-sm active">
+                            <input type="radio" name="options" class="toggle"
+                                   id="option1">Actions</label>
+                        <label class="btn btn-transparent dark btn-outline btn-circle btn-sm">
+                            <input type="radio" name="options" class="toggle" id="option2">Settings</label>
+                    </div>
+                </div>
+            </div>
+            <div class="portlet-body">
+
+                <table class="table table-striped table-bordered table-hover table-checkable order-column"
+                       id="sample_1">
+                    <thead>
+                    <tr>
+                        <th>
+                            <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                <input type="checkbox" class="group-checkable"
+                                       data-set="#sample_1 .checkboxes"/>
+                                <span></span>
+                            </label>
+                        </th>
+                        <th> 车辆品牌</th>
+                        <th> 车系型号</th>
+                        <th> 投诉涉及</th>
+                        <th> “维修”词数</th>
+                        <th> “自燃、爆炸”词数</th>
+                        <th> “伤亡”信息</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for foo in content %}
+                        <tr class="odd gradeX">
+                            <td>
+                                <label class="mt-checkbox mt-checkbox-single mt-checkbox-outline">
+                                    <input type="checkbox" class="checkboxes" value="1"/>
+                                    <span></span>
+                                </label>
+                            </td>
+                            <td>{{ foo.brand }}</td>
+                            <td>{{ foo.car_class }}</td>
+                            <td>{{ foo.typical_fault }}</td>
+                            <td>{{ foo.repair_num }}</td>
+                            <td>{{ foo.safety_num }}</td>
+                            <td>{{ foo.injury_num }}</td>
+
+                        </tr>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- END EXAMPLE TABLE PORTLET-->
+    </div>
+</div>

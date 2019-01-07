@@ -1,0 +1,212 @@
+<style>
+    .el-table__body-wrapper{
+        overflow:hidden !important;
+    }
+
+</style>
+
+<div id="app">
+  <div class="portlet light bordered">
+    <div class="portlet-title tabbable-line">
+        模型管理
+    </div>
+    <div class="portlet-body">
+        <div class="row">
+            <div class="col-md-12">
+                <el-form :inline="true" :model="formInline" class="demo-form-inline">
+                  <el-form-item label="审批人">
+                    <el-input v-model="formInline.user" size="mini" placeholder="审批人"></el-input>
+                  </el-form-item>
+                  <el-form-item label="活动区域">
+                    <el-select v-model="formInline.region" placeholder="活动区域" size="mini">
+                      <el-option label="区域一" value="shanghai"></el-option>
+                      <el-option label="区域二" value="beijing"></el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item>
+                    <el-button type="primary" @click="onSubmit" size="mini">查询</el-button>
+                  </el-form-item>
+                </el-form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+
+                <el-table
+                        border
+                ref="multipleTable"
+                :data="tableData3"
+                tooltip-effect="dark"
+                style="width: 100% !important;"
+                @selection-change="handleSelectionChange">
+                <el-table-column type="selection"></el-table-column>
+                <el-table-column v-for="v in column_arr"
+                  :prop="v.col"
+                  :label="v.cn"
+                   sortable >
+                </el-table-column>
+
+                <el-table-column label="操作">
+                  <template slot-scope="scope">
+                    <el-button
+                      size="mini"
+                      @click="handleEdit(scope.$index, scope.row)">模型使用</el-button>
+                    <el-button
+                      size="mini"
+                      type="danger"
+                      @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                  </template>
+                </el-table-column>
+
+              </el-table>
+
+                <el-dialog title="模型使用" :visible.sync="dialogTableVisible">
+
+                    <el-tag type="success" style="margin-bottom: 15px;">特征字段</el-tag>
+                    <el-row :gutter="20">
+                      <el-col :span="12"  v-for="(v,i) in curr_feature" style="margin-bottom: 15px;">
+                          <div class="grid-content">
+                                <el-input placeholder="请输入内容" v-model="feature_arr[i]" size="small">
+                                    <template slot="prepend">{{ v }}</template>
+                                </el-input>
+                          </div>
+                      </el-col>
+                    </el-row>
+                    <el-row :gutter="20">
+                      <el-col :span="12" style="margin-bottom: 15px;">
+                          <div class="grid-content">
+                              <el-button type="primary" @click="result_sub" size="small">提交分析</el-button>
+                          </div>
+                      </el-col>
+                    </el-row>
+                    <hr/>
+                    <el-tag type="success" style="margin-bottom: 15px;">预测字段</el-tag>
+                    <el-row :gutter="20">
+                      <el-col :span="12"  v-for="(v,i) in curr_predict" style="margin-bottom: 15px;">
+                          <div class="grid-content">
+                                 <el-input placeholder="" size="small" readOnly v-model="pre_val[i]">
+                                    <template slot="prepend">{{ v }}</template>
+                                 </el-input>
+                          </div>
+                      </el-col>
+                    </el-row>
+
+
+                </el-dialog>
+
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 15px;">
+            <div class="col-md-12">
+                <el-pagination
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        :current-page="currentPage"
+                        :page-sizes="[100, 200, 300, 400, 500]"
+                        :page-size="100"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total="total">
+                </el-pagination>
+            </div>
+        </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+
+<script src="../static/assets/js/element.min.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+
+ var app = new Vue({
+     el: '#app',
+	  data: {
+
+          formInline: {user: '', region: ''},
+          column_arr: [{cn: '模型名称', col: 'name'},{cn: '模型文件名', col: 'file_name'},{cn: '特征字段', col: 'feature'},{cn: '分析字段', col: 'predict'},{cn: '模型类别', col: 'type_name'}],
+          tableData3: [],
+          multipleSelection: [],
+          currentPage: 1,
+          currentSize: 100,
+          total: 0,
+          dialogTableVisible: false,
+          curr_feature: [],
+          curr_predict: [],
+          dynamicValidateForm: {
+              domains: [{
+                value: ''
+              }],
+          },
+          feature_arr:[],
+          predict_arr:[],
+          model_name: '',
+          model_type: 1,
+          pre_val:[]
+      },
+      methods: {
+	     toggleSelection:function(rows) {
+            if (rows) {
+              rows.forEach(row => {
+                this.$refs.multipleTable.toggleRowSelection(row);
+              });
+            } else {
+              this.$refs.multipleTable.clearSelection();
+            }
+         },
+         handleSelectionChange:function(val) {
+            this.multipleSelection = val;
+         },
+         handleEdit:function(index, row) {
+	         this.feature_arr = [];
+             this.predict_arr=[];
+             this.pre_val = [];
+             this.dialogTableVisible = true;
+             this.curr_feature = row.feature.split(',');
+             this.curr_predict = row.predict.split(',');
+             this.model_name = row.file_name;
+             this.model_type = row.type;
+         },
+         handleDelete:function(index, row) {
+            console.log(index, row);
+         },
+         handleSizeChange: function(val) {
+                this.currentSize = val;
+         },
+         handleCurrentChange: function(val) {
+                this.currentPage = val;
+         },
+         onSubmit:function() {
+            console.log('submit!');
+         },
+         model_list:function(){
+	         that  = this;
+	        $.post('model_list/',{limit:this.currentSize, page:this.currentPage, data: this.formInline},function(res){
+                console.log(res);
+                that.tableData3 = res.data.map(e=>Object.assign(e,{type_name:e.type==1? '分类':'预测'}));
+                that.total = res.total;
+
+            })
+         },
+        result_sub:function(){
+             console.log(this.curr_feature.join(','));
+             console.log(this.feature_arr.join(','));
+             that = this;
+             $.post('model_use/',{feature:this.curr_feature.join(','), feature_value:this.feature_arr.join(','), model_name: this.model_name, model_type:this.model_type},function(res){
+                 console.log(res)
+                 Vue.set(that.pre_val, 0 , res);
+             })
+        }
+      },
+
+	  mounted:function(){
+         this.model_list();
+	  },
+});
+
+
+
+</script>

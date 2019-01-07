@@ -1,0 +1,149 @@
+<div id="app">
+  <div class="portlet light bordered">
+    <div class="portlet-title tabbable-line">
+      <div class="caption">
+        <i class="icon-list font-green-sharp"></i>
+        <span class="caption-subject font-green-sharp " style="margin-left:10px">聊天关键词</span></div>
+      <ul class="nav nav-tabs">
+        <li v-bind:class="{'active':tab=='list'}" @click="tab='list'">
+          <a href="javascript:;">列表</a></li>
+        <li v-bind:class="{'active':tab=='detail'}" @click="tab='detail'" v-show="tab=='detail'">
+          <a href="javascript:;">详情</a></li>
+      </ul>
+    </div>
+    <div class="portlet-body">
+      <div class="tab-content">
+        <div class="tab-pane" v-show="tab=='list'" v-bind:class="{'active':tab=='list'}">
+          <div class="portlet-title tabbable-line">
+            <form class="form-horizontal" role="form">
+              <div class="form-body">
+                <div class="form-group">
+                  <div class="col-md-4">
+                    <div class="input-group">
+                      <span class="input-group-addon">聊天关键词</span>
+                      <input type="text" class="form-control" placeholder="请输入聊天关键词名称" v-model="searcher.keywordname"></div>
+                  </div>
+                  <div class="col-md-3">
+                  	<button type="button" class="btn green-meadow btn-circle" @click="search(10,1)">查询</button>
+                    <button type="button" class="btn purple-plum btn-circle" @click="clear_searcher()">重置</button>
+                    </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="portlet light portlet-fit bordered">
+            <!-- 功能按钮 -->
+              aaaa
+            <my-fun :grid='grid' :onadd='onadd' :ondelete='ondelete'></my-fun>
+            <!-- 功能按钮结束 -->
+            <div class="portlet-body">
+              <!-- 表单部分 -->
+              <my-grid :grid='grid' :fun_line_look='fun_line_look' :fun_line_edit='fun_line_edit' :fun_line_delete='fun_line_delete'></my-grid>
+              <!-- 表单组件结束 -->
+              <!-- 分页部分 -->
+              <my-pager :grid="grid" :search="search"></my-pager>
+              <!-- 分页部分结束 -->
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane" v-show="tab=='detail'" v-bind:class="{'active':tab=='detail'}">
+          <!-- <my-fun :grid='grid'></my-fun>
+          <my-grid :grid='grid' ></my-grid>
+          <my-pager :grid="grid" :search="search" ></my-pager>
+          -->
+          <form role="form" class="form-horizontal">
+            <div class="form-body">
+
+            	<div class="form-group" >
+					<div class="col-md-12" style="min-height:90px;">
+	                         <label class="col-md-1 control-label">聊天关键词：</label>
+	                         <div class="col-md-11">
+	                         	<textarea class="form-control" rows="4" v-model="form.name.value" v-if="status==1"></textarea>
+	                         	<label class="control-label" v-if="status==0">{{form.name.value}}</label>
+	                		 </div>
+	                </div>
+				 </div>
+				 <hr>
+              <div class="panel-body form-horizontal">
+                <div class="col-sm-12 text-center">
+                  <button type="button" class="btn btn-circle btn-default" @click="tab='list'">
+                    <i class="fa fa-mail-reply"></i>&nbsp;&nbsp; 返回</button>
+                  <button type="button" class="btn btn-circle blue" v-bind:disabled="busy||!validAll()" @click="save()" v-if="status==1">
+                    <i class="fa fa-save"></i>
+                    <i class="fa fa-refresh fa-spin" v-bind:class="{'hide':!busy}"></i>&nbsp;&nbsp; 保存</button>
+                </div>
+              </div>
+          </form>
+          </div>
+        </div>
+        <!--END TABS-->
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+<script type="text/javascript">
+
+  var app = new Vue({
+	  el: '#app',
+	  data: Object.assign(Object.assign({},common_data),{
+		    grid:Object.assign(Object.assign({},common_grid),{
+		    	list_path:'model_list/',
+		    	remove_path:'',
+		    	save_path:'',
+		    	export_path:'',
+		    	column:[
+		    	        {name:'模型名称',_class:'col-md-2',code:'name'},
+                        {name:'模型文件名',_class:'col-md-2',code:'file_name'},
+                        {name:'模型特征字段',_class:'col-md-2',code:'feature'},
+                        {name:'模型预测分类字段',_class:'col-md-2',code:'predict'},
+                        {name:'模型类型',_class:'col-md-2',code:'type'},
+		    	        ],
+		    	data:[],
+		    	total:100,
+		    	page:1,
+		    	limit:10,
+		    	addable:true,//是否新增
+		    	selectable:true,//是否支持多选
+		    	editable:true,//是否可编辑
+		    	removable:true,//是否可删除
+		    	exportable:false,//是否可导出
+		    	line_look:function(item){return true},//该行是否可以查看
+		    	line_edit:function(item){return false},//该行是否可以修改
+		    	line_delete:function(item){return true},//该行是否可以删除
+
+		    }),
+		    tab:'list',
+		    form:{
+
+		    	/* questiontext : {'value':''  , 'init':''  , 'valid':true, 'message':' ', 'rule':[]}, */
+		    	id : {'value':''  , 'init':''  , 'valid':true, 'message':' ', 'rule':[]},
+		    	name: {'value':''  , 'init':''  , 'valid':true, 'message':' ', 'rule':[]}
+		    	/* funclass: {'value':''  , 'init':'1'  , 'valid':true, 'message':' ', 'rule':[]} */
+		    },
+		    status:0,//0 查看 1编辑
+		    /* funs:[{id:'',name:'未选择'},{id:1,name:"1"},{id:101,name:"101"},{id:102,name:"102"},{id:103,name:"103"}],  */
+		    /* answerstatuslist:[{id:'',name:'未选择'},{id:'1',name:'已回答'},{id:'0',name:'未回答'}], */
+		    searcher:{
+		    	/* questiontext:'', */
+		    	keywordname:''
+		    	/* funcalss:'', */
+		    	/* answerstatus:'0' */
+		    }
+
+		  }),
+	  methods:Object.assign(Object.assign({},common_method),{
+
+	  }),
+	  mounted:function(){
+		  this.search();
+	  },
+
+});
+
+
+
+</script>
